@@ -14,5 +14,5 @@ public class BoardDTO {
     private String boardTitle; //제목
     private String boardContents; //내용
     private int boardHits; //조회수
-    private String createAt; //작성시간
+    private String createdAt; //작성시간
 }
