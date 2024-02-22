@@ -20,26 +20,28 @@ public class BoardService {
         return boardRepository.findAll();
     }
     public void save(BoardDTO boardDTO) throws IOException {
-        if(boardDTO.getBoardFile().isEmpty()){ //첨부된 파일이 없으면
+        if(boardDTO.getBoardFile().get(0).isEmpty()){ //첨부된 파일이 없으면
             boardDTO.setFileAttached(0);
             boardRepository.save(boardDTO);
-        } else{
+        } else {
             boardDTO.setFileAttached(1);
             BoardDTO saveBoard = boardRepository.save(boardDTO); // 게시글 저장 후 id값 활용을 위한 리턴 받음
-            MultipartFile boardFile = boardDTO.getBoardFile(); //파일만 따로 가져오기
-            String originalFilename = boardFile.getOriginalFilename(); // 파일 이름 가져오기
-            System.out.println("originalFileName = "+ originalFilename);
-            System.out.println(System.currentTimeMillis()); // 저장용 이름 만들기 위한 시간 로그 찍기
-            String storedFileName = System.currentTimeMillis() +"-"+originalFilename; // 저장용 이름은 시간 + 원본이름
-            System.out.println("storedFileName = "+storedFileName);
-            BoardFileDTO boardFileDTO = new BoardFileDTO();
-            boardFileDTO.setOriginalFileName(originalFilename);
-            boardFileDTO.setStoredFileName(storedFileName);
-            boardFileDTO.setBoardId(saveBoard.getId());
-            //파일 저장용 폴더에 파일 저장 처리
-            String savePath = "/Users/youngriming/Desktop/Practice/"+storedFileName;
-            boardFile.transferTo(new File(savePath));
-            boardRepository.saveFile(boardFileDTO);
+            for (MultipartFile boardFile : boardDTO.getBoardFile()) {
+                //파일만 따로 가져오기
+                String originalFilename = boardFile.getOriginalFilename(); // 파일 이름 가져오기
+                System.out.println("originalFileName = " + originalFilename);
+                System.out.println(System.currentTimeMillis()); // 저장용 이름 만들기 위한 시간 로그 찍기
+                String storedFileName = System.currentTimeMillis() + "-" + originalFilename; // 저장용 이름은 시간 + 원본이름
+                System.out.println("storedFileName = " + storedFileName);
+                BoardFileDTO boardFileDTO = new BoardFileDTO();
+                boardFileDTO.setOriginalFileName(originalFilename);
+                boardFileDTO.setStoredFileName(storedFileName);
+                boardFileDTO.setBoardId(saveBoard.getId());
+                //파일 저장용 폴더에 파일 저장 처리
+                String savePath = "/Users/youngriming/Desktop/Practice/" + storedFileName;
+                boardFile.transferTo(new File(savePath));
+                boardRepository.saveFile(boardFileDTO);
+            }
         }
     }
     public void updateHits(Long id) {
@@ -58,7 +60,7 @@ public class BoardService {
         boardRepository.delete(id);
     }
 
-    public BoardFileDTO findFile(Long id) {
+    public List<BoardFileDTO> findFile(Long id) {
         return boardRepository.findFile(id);
     }
 }
